@@ -27,6 +27,16 @@ async function run() {
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
 
+    const database = client.db("MediMart");
+    const usersCollection = database.collection("users");
+
+    app.post('/users', async (req, res) => {
+      const usersBody = req.body
+      const result = await usersCollection.insertOne(usersBody)
+      res.send(result)
+    })
+
+
 
 
 
@@ -40,14 +50,10 @@ async function run() {
 }
 run().catch(console.dir);
 
-
-
-
-
 app.get('/', (req, res) => {
-    res.send("MediMart Website make ...")
+  res.send("MediMart Website make ...")
 })
 
 app.listen(port, () => {
-    console.log("Server Runnig", port);
+  console.log("Server Runnig", port);
 })
