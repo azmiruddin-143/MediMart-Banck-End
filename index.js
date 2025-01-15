@@ -91,6 +91,12 @@ async function run() {
       res.send(result)
     })
 
+    app.post('/category', async (req, res) => {
+      const usersBody = req.body
+      const result = await categoryCollection.insertOne(usersBody)
+      res.send(result)
+    })
+
 
 
 
