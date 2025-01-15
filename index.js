@@ -132,6 +132,13 @@ async function run() {
       res.send(result)
     })
 
+    app.post('/advertisement', async (req, res) => {
+      const usersBody = req.body
+      const result = await advertisementCollection.insertOne(usersBody)
+      res.send(result)
+    })
+
+
 
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
