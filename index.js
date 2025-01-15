@@ -30,6 +30,7 @@ async function run() {
 
     const database = client.db("MediMart");
     const usersCollection = database.collection("users");
+    const categoryCollection = database.collection("category");
     
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -60,7 +61,7 @@ async function run() {
     }
       // next()
 
-    app.post('/users', verifyToken, async (req, res) => {
+    app.post('/users', async (req, res) => {
       const usersBody = req.body
       const result = await usersCollection.insertOne(usersBody)
       res.send(result)
@@ -82,6 +83,16 @@ async function run() {
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result)
     })
+
+    // category//
+
+    app.get('/category', async (req, res) => {
+      const result = await categoryCollection.find().toArray()
+      res.send(result)
+    })
+
+
+
 
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
