@@ -60,13 +60,26 @@ async function run() {
     }
       // next()
 
-    app.post('/users', async (req, res) => {
+    app.post('/users', verifyToken, async (req, res) => {
       const usersBody = req.body
       const result = await usersCollection.insertOne(usersBody)
       res.send(result)
     })
     app.get('/users', async (req, res) => {
       const result = await usersCollection.find().toArray()
+      res.send(result)
+    })
+
+    // user role update///
+
+    app.patch('/users/role/:email', async (req, res) => {
+      const userEmail = req.params.email
+      const { userRole } = req.body
+      const filter = { userEmail }
+      updateDoc = {
+        $set: {userRole},
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result)
     })
 
