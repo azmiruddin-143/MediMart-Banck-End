@@ -35,17 +35,16 @@ async function run() {
       const result = await usersCollection.insertOne(usersBody)
       res.send(result)
     })
-
-
-
-
-
+    app.get('/users', async (req, res) => {
+      const result = await usersCollection.find().toArray()
+      res.send(result)
+    })
 
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
