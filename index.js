@@ -138,6 +138,17 @@ async function run() {
       res.send(result)
     })
 
+    
+    app.patch('/advertisement/status/:id', async (req, res) => {
+      const id = req.params.id
+      const {advertisementStatus} = req.body
+      const filter = {_id: new ObjectId(id) }
+      updateDoc = {
+        $set: {advertisementStatus},
+      };
+      const result = await advertisementCollection.updateOne(filter, updateDoc);
+      res.send(result)
+    })
 
 
 
