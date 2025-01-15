@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require('express');
 const app = express()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 var jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000
@@ -31,7 +31,7 @@ async function run() {
     const database = client.db("MediMart");
     const usersCollection = database.collection("users");
     const categoryCollection = database.collection("category");
-    
+
     app.post('/jwt', async (req, res) => {
       const user = req.body
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '5h' })
@@ -40,9 +40,9 @@ async function run() {
 
 
     // ...........................//
-     // midde ware //
+    // midde ware //
 
-     const verifyToken = (req, res, next) => {
+    const verifyToken = (req, res, next) => {
       console.log(req.headers);
 
       if (!req.headers.authorization) {
@@ -59,7 +59,7 @@ async function run() {
       });
 
     }
-      // next()
+    // next()
 
     app.post('/users', async (req, res) => {
       const usersBody = req.body
@@ -78,7 +78,7 @@ async function run() {
       const { userRole } = req.body
       const filter = { userEmail }
       updateDoc = {
-        $set: {userRole},
+        $set: { userRole },
       };
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result)
@@ -99,6 +99,19 @@ async function run() {
 
 
 
+    app.put('/category/:id', async (req, res) => {
+      const id = req.params.id
+      const filter = { _id: new ObjectId(id) }
+      const updateCategory= req.body
+      const updateDoc = {
+        $set: {
+          categoryName: updateCategory.categoryName,
+          categoryImage: updateCategory.categoryImage,
+        }
+      }
+      const result = await categoryCollection.updateOne(filter, updateDoc);
+      res.send(result)
+    })
 
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
