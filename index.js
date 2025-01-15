@@ -31,6 +31,7 @@ async function run() {
     const database = client.db("MediMart");
     const usersCollection = database.collection("users");
     const categoryCollection = database.collection("category");
+    const advertisementCollection = database.collection("advertisement");
 
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -98,11 +99,11 @@ async function run() {
     })
 
 
-
+    //  category update
     app.put('/category/:id', async (req, res) => {
       const id = req.params.id
       const filter = { _id: new ObjectId(id) }
-      const updateCategory= req.body
+      const updateCategory = req.body
       const updateDoc = {
         $set: {
           categoryName: updateCategory.categoryName,
@@ -114,14 +115,22 @@ async function run() {
     })
 
 
-    app.delete('/category/:id', async (req, res) => {
-      const query = {_id: new ObjectId(id)};
+    //  category delete/
+    app.delete("/category/:id", async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) };
       const result = await categoryCollection.deleteOne(query);
       res.send(result)
     })
 
 
+    //  .............advertisement ////////////
 
+
+    app.get('/advertisement', async (req, res) => {
+      const result = await advertisementCollection.find().toArray()
+      res.send(result)
+    })
 
 
 
