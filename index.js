@@ -32,6 +32,7 @@ async function run() {
     const usersCollection = database.collection("users");
     const categoryCollection = database.collection("category");
     const advertisementCollection = database.collection("advertisement");
+    const medicineCollection = database.collection("medicine");
 
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -151,6 +152,12 @@ async function run() {
     })
 
 
+    // medicine collcektion //
+
+    app.get('/medicine', async (req, res) => {
+      const result = await medicineCollection.find().toArray()
+      res.send(result)
+    })
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
