@@ -136,7 +136,7 @@ async function run() {
     app.get('/acceptad-advertisement', async (req, res) => {
       try {
         const result = await advertisementCollection
-          .find({ advertisementStatus: "Accepted" }) 
+          .find({ advertisementStatus: "Accepted" })
           .toArray();
         res.send(result);
       } catch (error) {
@@ -144,7 +144,7 @@ async function run() {
         res.status(500).send({ error: "Failed to fetch advertisements" });
       }
     });
-    
+
 
     app.post('/advertisement', async (req, res) => {
       const usersBody = req.body
@@ -152,13 +152,13 @@ async function run() {
       res.send(result)
     })
 
-    
+
     app.patch('/advertisement/status/:id', async (req, res) => {
       const id = req.params.id
-      const {advertisementStatus} = req.body
-      const filter = {_id: new ObjectId(id) }
+      const { advertisementStatus } = req.body
+      const filter = { _id: new ObjectId(id) }
       updateDoc = {
-        $set: {advertisementStatus},
+        $set: { advertisementStatus },
       };
       const result = await advertisementCollection.updateOne(filter, updateDoc);
       res.send(result)
@@ -171,6 +171,11 @@ async function run() {
       const result = await medicineCollection.find().toArray()
       res.send(result)
     })
+    app.get('/medicine-percent', async (req, res) => {
+      const query = { discountPercentage: { $gt: 0 } };
+      const result = await medicineCollection.find(query).toArray();
+      res.send(result)
+    });
 
     app.post('/medicine', async (req, res) => {
       const usersBody = req.body
