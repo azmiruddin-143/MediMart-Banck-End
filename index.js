@@ -133,6 +133,19 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/acceptad-advertisement', async (req, res) => {
+      try {
+        const result = await advertisementCollection
+          .find({ advertisementStatus: "Accepted" }) 
+          .toArray();
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching advertisements:", error);
+        res.status(500).send({ error: "Failed to fetch advertisements" });
+      }
+    });
+    
+
     app.post('/advertisement', async (req, res) => {
       const usersBody = req.body
       const result = await advertisementCollection.insertOne(usersBody)
@@ -182,6 +195,14 @@ async function run() {
         }
       }
       const result = await medicineCollection.updateOne(filter, updateDoc);
+      res.send(result)
+    })
+
+
+    app.delete("/medicine/:id", async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) };
+      const result = await medicineCollection.deleteOne(query);
       res.send(result)
     })
 
