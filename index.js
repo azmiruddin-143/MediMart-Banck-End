@@ -161,9 +161,30 @@ async function run() {
 
     app.post('/medicine', async (req, res) => {
       const usersBody = req.body
-      const result = await categoryCollection.insertOne(usersBody)
+      const result = await medicineCollection.insertOne(usersBody)
       res.send(result)
     })
+
+    app.put('/medicine/:id', async (req, res) => {
+      const id = req.params.id
+      const filter = { _id: new ObjectId(id) }
+      const updateMedicine = req.body
+      const updateDoc = {
+        $set: {
+          medicineName: updateMedicine.medicineName,
+          genericName: updateMedicine.genericName,
+          shortDescription: updateMedicine.shortDescription,
+          medicineImage: updateMedicine.medicineImage,
+          company: updateMedicine.company,
+          medicineMassUnit: updateMedicine.medicineMassUnit,
+          perUnitPrice: updateMedicine.perUnitPrice,
+          discountPercentage: updateMedicine.discountPercentage,
+        }
+      }
+      const result = await medicineCollection.updateOne(filter, updateDoc);
+      res.send(result)
+    })
+
 
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
