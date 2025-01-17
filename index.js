@@ -222,13 +222,22 @@ async function run() {
       res.send(result)
     })
 
-    
+
     app.get('/carts', async (req, res) => {
       const email = req.query.email
-      const query = {email: email}
+      const query = { email: email }
       const result = await cartsCollection.find(query).toArray()
       res.send(result)
     })
+
+    app.get("/carts/total", async (req, res) => {
+      const payments = await cartsCollection.find().toArray();
+      const totalPrice = payments.reduce((sum, payment) => sum + payment.subTotal, 0);
+      res.send({ totalPrice });
+    });
+
+
+
 
 
     app.put('/carts/:id', async (req, res) => {
@@ -259,8 +268,6 @@ async function run() {
       const result = await cartsCollection.deleteMany(query);
       res.send(result)
     })
-
-
 
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
