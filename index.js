@@ -33,6 +33,7 @@ async function run() {
     const categoryCollection = database.collection("category");
     const advertisementCollection = database.collection("advertisement");
     const medicineCollection = database.collection("medicine");
+    const cartsCollection = database.collection("carts");
 
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -94,8 +95,8 @@ async function run() {
     })
 
     app.post('/category', async (req, res) => {
-      const usersBody = req.body
-      const result = await categoryCollection.insertOne(usersBody)
+      const categoryBody = req.body
+      const result = await categoryCollection.insertOne(categoryBody)
       res.send(result)
     })
 
@@ -147,8 +148,8 @@ async function run() {
 
 
     app.post('/advertisement', async (req, res) => {
-      const usersBody = req.body
-      const result = await advertisementCollection.insertOne(usersBody)
+      const advertisementsBody = req.body
+      const result = await advertisementCollection.insertOne(advertisementsBody)
       res.send(result)
     })
 
@@ -178,8 +179,8 @@ async function run() {
     });
 
     app.post('/medicine', async (req, res) => {
-      const usersBody = req.body
-      const result = await medicineCollection.insertOne(usersBody)
+      const medicineBody = req.body
+      const result = await medicineCollection.insertOne(medicineBody)
       res.send(result)
     })
 
@@ -210,6 +211,20 @@ async function run() {
       const result = await medicineCollection.deleteOne(query);
       res.send(result)
     })
+
+
+
+    // carts collections///
+
+    app.post('/carts', async (req, res) => {
+      const cartsBody = req.body
+      const result = await cartsCollection.insertOne(cartsBody)
+      res.send(result)
+    })
+
+
+
+
 
 
 
