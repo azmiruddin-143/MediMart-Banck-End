@@ -222,6 +222,12 @@ async function run() {
       res.send(result)
     })
 
+    
+    app.get('/carts', async (req, res) => {
+      const result = await cartsCollection.find().toArray()
+      res.send(result)
+    })
+
 
 
 
