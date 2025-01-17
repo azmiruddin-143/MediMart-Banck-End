@@ -224,7 +224,24 @@ async function run() {
 
     
     app.get('/carts', async (req, res) => {
-      const result = await cartsCollection.find().toArray()
+      const email = req.query.email
+      const query = {email: email}
+      const result = await cartsCollection.find(query).toArray()
+      res.send(result)
+    })
+
+
+    app.put('/carts/:id', async (req, res) => {
+      const id = req.params.id
+      const filter = { _id: new ObjectId(id) }
+      const updateCart = req.body
+      const updateDoc = {
+        $set: {
+          quantity: updateCart.quantity,
+          subTotal: updateCart.subTotal,
+        }
+      }
+      const result = await cartsCollection.updateOne(filter, updateDoc);
       res.send(result)
     })
 
