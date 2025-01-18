@@ -66,10 +66,17 @@ async function run() {
 
     app.post('/users', async (req, res) => {
       const usersBody = req.body
+      // new up
+      const query = { userEmail: usersBody.userEmail }
+      const existingUser = await usersCollection.findOne(query)
+      if (existingUser) {
+        return res.send({ message: 'user already exists', insertedId: null })
+      }
+      // new up
       const result = await usersCollection.insertOne(usersBody)
       res.send(result)
     })
-    app.get('/users', async (req, res) => {
+    app.get('/users', verifyToken, async (req, res) => {
       const result = await usersCollection.find().toArray()
       res.send(result)
     })
@@ -178,6 +185,20 @@ async function run() {
       res.send(result)
     });
 
+    // /
+
+    app.get('/categoryMedicine', async (req, res) => {
+      const categoryName = req.query.category;
+      const medicines = await medicineCollection.find({ medicineCategory: categoryName }).toArray();
+      res.send(medicines);
+    });
+
+    // /////
+
+
+
+
+
     app.post('/medicine', async (req, res) => {
       const medicineBody = req.body
       const result = await medicineCollection.insertOne(medicineBody)
@@ -235,7 +256,6 @@ async function run() {
       const totalPrice = payments.reduce((sum, payment) => sum + payment.subTotal, 0);
       res.send({ totalPrice });
     });
-
 
 
 
