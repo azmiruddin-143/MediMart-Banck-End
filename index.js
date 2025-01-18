@@ -81,8 +81,28 @@ async function run() {
       res.send(result)
     })
 
-    // user role update///
+    // admin user validation//
 
+
+    app.get('/users/admin/:email', verifyToken, async (req, res) => {
+      const userEmail = req.params.email
+      if(userEmail !== req.decoded.email) {
+        return res.status(403).send({ message: "unauthorized access" })
+      }
+
+      const query = {userEmail: userEmail}
+      const user = await usersCollection.findOne(query)
+      let admin = false
+      if(user) {
+         admin = user?.userRole === "Admin"
+      }
+      
+      res.send({admin})
+    })
+
+
+
+    // user role update//
     app.patch('/users/role/:email', async (req, res) => {
       const userEmail = req.params.email
       const { userRole } = req.body
