@@ -213,6 +213,8 @@ async function run() {
       const result = await medicineCollection.find().toArray()
       res.send(result)
     })
+
+
     app.get('/medicine-percent', async (req, res) => {
       const query = { discountPercentage: { $gt: 0 } };
       const result = await medicineCollection.find(query).toArray();
@@ -324,6 +326,21 @@ async function run() {
       const result = await cartsCollection.deleteMany(query);
       res.send(result)
     })
+
+    // Admin home page//
+
+
+
+    app.get("/payment/pending", async (req, res) => {
+      const pendingQuery = {status: "Pending"}
+      const paidQuery = {status: "Paid"}
+      const pendingCount = await paymentCollection.countDocuments(pendingQuery)
+      const paidCount = await paymentCollection.countDocuments(paidQuery)
+      res.send({ pendingCount,paidCount });
+    });
+
+
+
 
 // /////////////////////////////////////////////////////
 
