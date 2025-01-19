@@ -5,6 +5,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 var jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 app.use(express.json())
 app.use(cors())
 
@@ -34,6 +35,7 @@ async function run() {
     const advertisementCollection = database.collection("advertisement");
     const medicineCollection = database.collection("medicine");
     const cartsCollection = database.collection("carts");
+    const paymentCollection = database.collection("payments");
 
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -128,7 +130,7 @@ async function run() {
 
     // category//
 
-    app.get('/category',verifyToken,verifyAdmin,async (req, res) => {
+    app.get('/category',async (req, res) => {
       const result = await categoryCollection.find().toArray()
       res.send(result)
     })
@@ -168,12 +170,12 @@ async function run() {
     //  .............advertisement ////////////
 
 
-    app.get('/advertisement',verifyToken, async (req, res) => {
+    app.get('/advertisement', async (req, res) => {
       const result = await advertisementCollection.find().toArray()
       res.send(result)
     })
 
-    app.get('/acceptad-advertisement',verifyToken, async (req, res) => {
+    app.get('/acceptad-advertisement', async (req, res) => {
       try {
         const result = await advertisementCollection
           .find({ advertisementStatus: "Accepted" })
@@ -269,22 +271,24 @@ async function run() {
 
     // carts collections///
 
-    app.post('/carts',verifyToken, async (req, res) => {
+    app.post('/carts', async (req, res) => {
       const cartsBody = req.body
       const result = await cartsCollection.insertOne(cartsBody)
       res.send(result)
     })
 
 
-    app.get('/carts',verifyToken, async (req, res) => {
+    app.get('/carts', async (req, res) => {
       const email = req.query.email
       const query = { email: email }
       const result = await cartsCollection.find(query).toArray()
       res.send(result)
     })
 
-    app.get("/carts/total",verifyToken, async (req, res) => {
-      const payments = await cartsCollection.find().toArray();
+    app.get("/carts/total", async (req, res) => {
+      const email = req.query.email
+      const query = { email: email }
+      const payments = await cartsCollection.find(query).toArray();
       const totalPrice = payments.reduce((sum, payment) => sum + payment.subTotal, 0);
       res.send({ totalPrice });
     });
@@ -320,6 +324,47 @@ async function run() {
       const result = await cartsCollection.deleteMany(query);
       res.send(result)
     })
+
+// /////////////////////////////////////////////////////
+
+   // payment intent
+   app.post('/create-payment-intent', async (req, res) => {
+    const { subTotal } = req.body;
+    const amount = parseInt(subTotal * 100);
+    console.log(amount, 'amount inside the intent')
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: 'usd',
+      payment_method_types: ['card']
+    });
+
+    res.send({
+      clientSecret: paymentIntent.client_secret
+    })
+  });
+
+
+  app.post('/payments', async (req, res) => {
+    const payment = req.body;
+    console.log('Received payment:', payment); // Debugging
+    const paymentResult = await paymentCollection.insertOne(payment);
+
+    //  carefully delete each item from the cart
+    console.log('payment info', payment);
+    const query = {
+      _id: {
+        $in: payment.cartIds.map(id => new ObjectId(id))
+      }
+    };
+
+    const deleteResult = await cartsCollection.deleteMany(query);
+
+    res.send({ paymentResult, deleteResult });
+  })
+
+
+
 
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
