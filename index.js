@@ -330,13 +330,23 @@ async function run() {
     // Admin home page//
 
 
-
-    app.get("/payment/pending", async (req, res) => {
+    app.get("/payment/pending-paid", async (req, res) => {
       const pendingQuery = {status: "Pending"}
       const paidQuery = {status: "Paid"}
       const pendingCount = await paymentCollection.countDocuments(pendingQuery)
       const paidCount = await paymentCollection.countDocuments(paidQuery)
       res.send({ pendingCount,paidCount });
+    });
+
+
+    app.get("/payment/price-calclute", async (req, res) => {
+      const pendingQuery = {status: "Pending"}
+      const paidQuery = {status: "Paid"}
+      const totalPrice = await paymentCollection.find(pendingQuery).toArray()
+      const pendingPrice = totalPrice.reduce((sum, payment) => sum + payment.price, 0);
+      const totalPaid = await paymentCollection.find(paidQuery).toArray()
+      const paidPrice = totalPaid.reduce((sum, payment) => sum + payment.price, 0);
+      res.send({pendingPrice,paidPrice});
     });
 
 
