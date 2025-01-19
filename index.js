@@ -64,21 +64,21 @@ async function run() {
       });
 
     }
- 
+
     // verifyAdmin //
 
     const verifyAdmin = async (req, res, next) => {
       const userEmail = req.decoded.email
-      console.log(req.decoded,"decoded");
-      const query = {userEmail: userEmail}
-      console.log(query,"query");
+      console.log(req.decoded, "decoded");
+      const query = { userEmail: userEmail }
+      console.log(query, "query");
       const user = await usersCollection.findOne(query)
-      console.log(user,"user");
+      console.log(user, "user");
       const isAdmin = user?.userRole === "Admin"
-      if(!isAdmin){
+      if (!isAdmin) {
         return res.status(403).send({ message: "forbidden access" })
       }
-        next()
+      next()
     }
 
 
@@ -105,9 +105,9 @@ async function run() {
     // admin user validation//
 
 
-     ////////// hooks user role/////////
+    ////////// hooks user role/////////
 
-     app.get('/users/role/:email',verifyToken, async (req, res) => {
+    app.get('/users/role/:email', verifyToken, async (req, res) => {
       const userEmail = req.params.email
       const query = { userEmail }
       const result = await usersCollection.findOne(query)
@@ -117,7 +117,7 @@ async function run() {
 
 
     // user role update//
-    app.patch('/users/role/:email',verifyToken,verifyAdmin,  async (req, res) => {
+    app.patch('/users/role/:email', verifyToken, verifyAdmin, async (req, res) => {
       const userEmail = req.params.email
       const { userRole } = req.body
       const filter = { userEmail }
@@ -130,7 +130,7 @@ async function run() {
 
     // category//
 
-    app.get('/category',async (req, res) => {
+    app.get('/category', async (req, res) => {
       const result = await categoryCollection.find().toArray()
       res.send(result)
     })
@@ -159,7 +159,7 @@ async function run() {
 
 
     //  category delete/
-    app.delete("/category/:id", verifyToken,  async (req, res) => {
+    app.delete("/category/:id", verifyToken, async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) };
       const result = await categoryCollection.deleteOne(query);
@@ -188,14 +188,14 @@ async function run() {
     });
 
 
-    app.post('/advertisement',verifyToken, async (req, res) => {
+    app.post('/advertisement', verifyToken, async (req, res) => {
       const advertisementsBody = req.body
       const result = await advertisementCollection.insertOne(advertisementsBody)
       res.send(result)
     })
 
 
-    app.patch('/advertisement/status/:id',verifyToken,verifyAdmin, async (req, res) => {
+    app.patch('/advertisement/status/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id
       const { advertisementStatus } = req.body
       const filter = { _id: new ObjectId(id) }
@@ -235,13 +235,13 @@ async function run() {
 
 
 
-    app.post('/medicine',verifyToken, async (req, res) => {
+    app.post('/medicine', verifyToken, async (req, res) => {
       const medicineBody = req.body
       const result = await medicineCollection.insertOne(medicineBody)
       res.send(result)
     })
 
-    app.put('/medicine/:id',verifyToken, async (req, res) => {
+    app.put('/medicine/:id', verifyToken, async (req, res) => {
       const id = req.params.id
       const filter = { _id: new ObjectId(id) }
       const updateMedicine = req.body
@@ -262,7 +262,7 @@ async function run() {
     })
 
 
-    app.delete("/medicine/:id",verifyToken, async (req, res) => {
+    app.delete("/medicine/:id", verifyToken, async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) };
       const result = await medicineCollection.deleteOne(query);
@@ -298,7 +298,7 @@ async function run() {
 
 
 
-    app.put('/carts/:id',verifyToken,  async (req, res) => {
+    app.put('/carts/:id', verifyToken, async (req, res) => {
       const id = req.params.id
       const filter = { _id: new ObjectId(id) }
       const updateCart = req.body
@@ -313,14 +313,14 @@ async function run() {
     })
 
 
-    app.delete("/carts/:id",verifyToken,  async (req, res) => {
+    app.delete("/carts/:id", verifyToken, async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) };
       const result = await cartsCollection.deleteOne(query);
       res.send(result)
     })
 
-    app.delete("/cartsClear", verifyToken,  async (req, res) => {
+    app.delete("/cartsClear", verifyToken, async (req, res) => {
       const id = req.params.id
       const query = {};
       const result = await cartsCollection.deleteMany(query);
@@ -331,72 +331,88 @@ async function run() {
 
 
     app.get("/payment/pending-paid", async (req, res) => {
-      const pendingQuery = {status: "Pending"}
-      const paidQuery = {status: "Paid"}
+      const pendingQuery = { status: "Pending" }
+      const paidQuery = { status: "Paid" }
       const pendingCount = await paymentCollection.countDocuments(pendingQuery)
       const paidCount = await paymentCollection.countDocuments(paidQuery)
-      res.send({ pendingCount,paidCount });
+      res.send({ pendingCount, paidCount });
     });
 
 
     app.get("/payment/price-calclute", async (req, res) => {
-      const pendingQuery = {status: "Pending"}
-      const paidQuery = {status: "Paid"}
+      const pendingQuery = { status: "Pending" }
+      const paidQuery = { status: "Paid" }
       const totalPrice = await paymentCollection.find(pendingQuery).toArray()
       const pendingPrice = totalPrice.reduce((sum, payment) => sum + payment.price, 0);
       const totalPaid = await paymentCollection.find(paidQuery).toArray()
       const paidPrice = totalPaid.reduce((sum, payment) => sum + payment.price, 0);
-      res.send({pendingPrice,paidPrice});
+      res.send({ pendingPrice, paidPrice });
     });
 
 
     app.get("/order/total", async (req, res) => {
       const totalOrder = await paymentCollection.countDocuments()
-      res.send({totalOrder});
+      res.send({ totalOrder });
     });
 
- 
-     
 
-// /////////////////////////////////////////////////////
-
-   // payment intent
-   app.post('/create-payment-intent', async (req, res) => {
-    const { subTotal } = req.body;
-    const amount = parseInt(subTotal * 100);
-    console.log(amount, 'amount inside the intent')
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount,
-      currency: 'usd',
-      payment_method_types: ['card']
-    });
-
-    res.send({
-      clientSecret: paymentIntent.client_secret
+    app.get('/all-payments', async (req, res) => {
+      const result = await paymentCollection.find().toArray()
+      res.send(result)
     })
-  });
 
-
-  app.post('/payments', async (req, res) => {
-    const payment = req.body;
-    console.log('Received payment:', payment); // Debugging
-    const paymentResult = await paymentCollection.insertOne(payment);
-
-    //  carefully delete each item from the cart
-    console.log('payment info', payment);
-    const query = {
-      _id: {
-        $in: payment.cartIds.map(id => new ObjectId(id))
+    app.put('/payment-status/:id', verifyToken, async (req, res) => {
+      const id = req.params.id
+      const filter = { _id: new ObjectId(id) }
+      const {status} = req.body
+      const updateDoc = {
+        $set: {
+          status
+        }
       }
-    };
-
-    const deleteResult = await cartsCollection.deleteMany(query);
-
-    res.send({ paymentResult, deleteResult });
-  })
+      const result = await paymentCollection.updateOne(filter, updateDoc);
+      res.send(result)
+    })
 
 
+
+    // /////////////////////////////////////////////////////
+
+    // payment intent
+    app.post('/create-payment-intent', async (req, res) => {
+      const { subTotal } = req.body;
+      const amount = parseInt(subTotal * 100);
+      console.log(amount, 'amount inside the intent')
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      })
+    });
+
+
+    app.post('/payments', async (req, res) => {
+      const payment = req.body;
+      console.log('Received payment:', payment); // Debugging
+      const paymentResult = await paymentCollection.insertOne(payment);
+
+      //  carefully delete each item from the cart
+      console.log('payment info', payment);
+      const query = {
+        _id: {
+          $in: payment.cartIds.map(id => new ObjectId(id))
+        }
+      };
+
+      const deleteResult = await cartsCollection.deleteMany(query);
+
+      res.send({ paymentResult, deleteResult });
+    })
 
 
 
