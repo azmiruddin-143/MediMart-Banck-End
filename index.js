@@ -350,7 +350,13 @@ async function run() {
     });
 
 
+    app.get("/order/total", async (req, res) => {
+      const totalOrder = await paymentCollection.countDocuments()
+      res.send({totalOrder});
+    });
 
+ 
+     
 
 // /////////////////////////////////////////////////////
 
