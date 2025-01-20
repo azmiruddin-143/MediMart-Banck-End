@@ -419,6 +419,15 @@ app.get('/all-payments/:email', async (req, res) => {
   res.send(result)
 })
 
+ // User Payment history//
+
+ app.get('/user/all-payments/:email', async (req, res) => {
+  const email = req.params.email
+  const query = {email:email}
+  const result = await paymentCollection.find(query).toArray()
+  res.send(result)
+})
+
 
     // /////////////////////////////////////////////////////
 
