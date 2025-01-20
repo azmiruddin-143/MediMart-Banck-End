@@ -412,8 +412,12 @@ app.get("/order/total/:email", async (req, res) => {
   res.send({ totalOrder });
 });
 
-
-
+app.get('/all-payments/:email', async (req, res) => {
+  const email = req.params.email
+  const query = {sellerEmail:email}
+  const result = await paymentCollection.find(query).toArray()
+  res.send(result)
+})
 
 
     // /////////////////////////////////////////////////////
