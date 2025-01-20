@@ -39,7 +39,7 @@ async function run() {
 
     app.post('/jwt', async (req, res) => {
       const user = req.body
-      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '5h' })
+      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.send({ token });
     })
 
@@ -213,6 +213,12 @@ async function run() {
       const result = await medicineCollection.find().toArray()
       res.send(result)
     })
+    app.get('/medicine/manage/:email', async (req, res) => {
+      const email = req.params.email
+      const query = {sellerEmail: email}
+      const result = await medicineCollection.find(query).toArray()
+      res.send(result)
+    })
 
 
     app.get('/medicine-percent', async (req, res) => {
@@ -373,6 +379,40 @@ async function run() {
       const result = await paymentCollection.updateOne(filter, updateDoc);
       res.send(result)
     })
+
+
+
+ // Seller home page//
+
+
+ app.get("/payment/pending-paid/:email", async (req, res) => {
+  const email = req.params.email
+  const pendingQuery = { status: "Pending",sellerEmail:email}
+  const paidQuery = { status: "Paid",sellerEmail:email }
+  const pendingCount = await paymentCollection.countDocuments(pendingQuery)
+  const paidCount = await paymentCollection.countDocuments(paidQuery)
+  res.send({ pendingCount, paidCount });
+});
+
+app.get("/payment/price-calclute/:email", async (req, res) => {
+  const email = req.params.email
+  const pendingQuery = { status: "Pending",sellerEmail:email }
+  const paidQuery = { status: "Paid",sellerEmail:email }
+  const totalPrice = await paymentCollection.find(pendingQuery).toArray()
+  const pendingPrice = totalPrice.reduce((sum, payment) => sum + payment.price, 0);
+  const totalPaid = await paymentCollection.find(paidQuery).toArray()
+  const paidPrice = totalPaid.reduce((sum, payment) => sum + payment.price, 0);
+  res.send({ pendingPrice, paidPrice });
+});
+
+app.get("/order/total/:email", async (req, res) => {
+  const email = req.params.email
+  const query = {sellerEmail:email}
+  const totalOrder = await paymentCollection.countDocuments(query)
+  res.send({ totalOrder });
+});
+
+
 
 
 
