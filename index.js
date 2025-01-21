@@ -212,6 +212,7 @@ async function run() {
     app.get('/medicine', async (req, res) => {
       // search filter setup/
       const search = req.query.search
+      const sort = req.query.sort
       const query = {
         $or: [
           { medicineName: { $regex: search, $options: 'i' } },
@@ -225,7 +226,10 @@ async function run() {
           
         ]
       };
-      const result = await medicineCollection.find(query).toArray()
+      
+      let options = {}
+      if (sort) options = { sort: { perUnitPrice: sort === "asc" ? 1 : -1 } }
+      const result = await medicineCollection.find(query,options).toArray()
       res.send(result)
     })
     app.get('/medicine/manage/:email', async (req, res) => {
