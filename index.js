@@ -210,12 +210,27 @@ async function run() {
     // medicine collcektion //
 
     app.get('/medicine', async (req, res) => {
-      const result = await medicineCollection.find().toArray()
+      // search filter setup/
+      const search = req.query.search
+      const query = {
+        $or: [
+          { medicineName: { $regex: search, $options: 'i' } },
+          { medicineCategory: { $regex: search, $options: 'i' } },
+          {
+            genericName: { $regex: search, $options: 'i' }
+          },
+          {
+            company: { $regex: search, $options: 'i' }
+          },
+          
+        ]
+      };
+      const result = await medicineCollection.find(query).toArray()
       res.send(result)
     })
     app.get('/medicine/manage/:email', async (req, res) => {
       const email = req.params.email
-      const query = {sellerEmail: email}
+      const query = { sellerEmail: email }
       const result = await medicineCollection.find(query).toArray()
       res.send(result)
     })
@@ -370,7 +385,7 @@ async function run() {
     app.put('/payment-status/:id', verifyToken, async (req, res) => {
       const id = req.params.id
       const filter = { _id: new ObjectId(id) }
-      const {status} = req.body
+      const { status } = req.body
       const updateDoc = {
         $set: {
           status
@@ -382,51 +397,60 @@ async function run() {
 
 
 
- // Seller home page//
+    // Seller home page//
 
 
- app.get("/payment/pending-paid/:email", async (req, res) => {
-  const email = req.params.email
-  const pendingQuery = { status: "Pending",sellerEmail:email}
-  const paidQuery = { status: "Paid",sellerEmail:email }
-  const pendingCount = await paymentCollection.countDocuments(pendingQuery)
-  const paidCount = await paymentCollection.countDocuments(paidQuery)
-  res.send({ pendingCount, paidCount });
-});
+    app.get("/payment/pending-paid/:email", async (req, res) => {
+      const email = req.params.email
+      const pendingQuery = { status: "Pending", sellerEmail: email }
+      const paidQuery = { status: "Paid", sellerEmail: email }
+      const pendingCount = await paymentCollection.countDocuments(pendingQuery)
+      const paidCount = await paymentCollection.countDocuments(paidQuery)
+      res.send({ pendingCount, paidCount });
+    });
 
-app.get("/payment/price-calclute/:email", async (req, res) => {
-  const email = req.params.email
-  const pendingQuery = { status: "Pending",sellerEmail:email }
-  const paidQuery = { status: "Paid",sellerEmail:email }
-  const totalPrice = await paymentCollection.find(pendingQuery).toArray()
-  const pendingPrice = totalPrice.reduce((sum, payment) => sum + payment.price, 0);
-  const totalPaid = await paymentCollection.find(paidQuery).toArray()
-  const paidPrice = totalPaid.reduce((sum, payment) => sum + payment.price, 0);
-  res.send({ pendingPrice, paidPrice });
-});
+    app.get("/payment/price-calclute/:email", async (req, res) => {
+      const email = req.params.email
+      const pendingQuery = { status: "Pending", sellerEmail: email }
+      const paidQuery = { status: "Paid", sellerEmail: email }
+      const totalPrice = await paymentCollection.find(pendingQuery).toArray()
+      const pendingPrice = totalPrice.reduce((sum, payment) => sum + payment.price, 0);
+      const totalPaid = await paymentCollection.find(paidQuery).toArray()
+      const paidPrice = totalPaid.reduce((sum, payment) => sum + payment.price, 0);
+      res.send({ pendingPrice, paidPrice });
+    });
 
-app.get("/order/total/:email", async (req, res) => {
-  const email = req.params.email
-  const query = {sellerEmail:email}
-  const totalOrder = await paymentCollection.countDocuments(query)
-  res.send({ totalOrder });
-});
+    app.get("/order/total/:email", async (req, res) => {
+      const email = req.params.email
+      const query = { sellerEmail: email }
+      const totalOrder = await paymentCollection.countDocuments(query)
+      res.send({ totalOrder });
+    });
 
-app.get('/all-payments/:email', async (req, res) => {
-  const email = req.params.email
-  const query = {sellerEmail:email}
-  const result = await paymentCollection.find(query).toArray()
-  res.send(result)
-})
+    app.get('/all-payments/:email', async (req, res) => {
+      const email = req.params.email
+      const query = { sellerEmail: email }
+      const result = await paymentCollection.find(query).toArray()
+      res.send(result)
+    })
 
- // User Payment history//
+    // User Payment history//
 
- app.get('/user/all-payments/:email', async (req, res) => {
-  const email = req.params.email
-  const query = {email:email}
-  const result = await paymentCollection.find(query).toArray()
-  res.send(result)
-})
+    app.get('/user/all-payments/:email', async (req, res) => {
+      const email = req.params.email
+      const query = { email: email }
+      const result = await paymentCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    //  invoice//
+
+    app.get('/invoice/payment/:transactionId', async (req, res) => {
+      const { transactionId } = req.params;
+      const payment = await paymentCollection.findOne({ transactionId })
+      res.send(payment)
+    });
+
 
 
     // /////////////////////////////////////////////////////
