@@ -178,7 +178,7 @@ async function run() {
     app.get('/acceptad-advertisement', async (req, res) => {
       try {
         const result = await advertisementCollection
-          .find({ advertisementStatus: "Accepted" })
+          .find({ advertisementStatus: "Accept" })
           .toArray();
         res.send(result);
       } catch (error) {
@@ -203,6 +203,13 @@ async function run() {
         $set: { advertisementStatus },
       };
       const result = await advertisementCollection.updateOne(filter, updateDoc);
+      res.send(result)
+    })
+
+    app.delete("/advertisement/:id",  async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) };
+      const result = await advertisementCollection.deleteOne(query);
       res.send(result)
     })
 
@@ -232,12 +239,20 @@ async function run() {
       const result = await medicineCollection.find(query,options).toArray()
       res.send(result)
     })
+
+//////////////////// Az
+
+
     app.get('/medicine/manage/:email', async (req, res) => {
       const email = req.params.email
       const query = { sellerEmail: email }
       const result = await medicineCollection.find(query).toArray()
       res.send(result)
     })
+
+
+
+// ////////
 
 
     app.get('/medicine-percent', async (req, res) => {
@@ -253,6 +268,7 @@ async function run() {
       const medicines = await medicineCollection.find({ medicineCategory: categoryName }).toArray();
       res.send(medicines);
     });
+
 
     // /////
 
