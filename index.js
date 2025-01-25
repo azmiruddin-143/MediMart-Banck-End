@@ -130,10 +130,24 @@ async function run() {
 
     // category//
 
+    // app.get('/category', async (req, res) => {
+    //   const result = await categoryCollection.find().toArray()
+    //   res.send(result)
+    // })
+
     app.get('/category', async (req, res) => {
-      const result = await categoryCollection.find().toArray()
-      res.send(result)
-    })
+      try {
+         const categories = await categoryCollection.find().toArray();
+         const categoryWithCount = await Promise.all(categories.map(async (category) => {
+            const productCount = await medicineCollection.countDocuments({ medicineCategory: category.categoryName });
+            return { ...category, productCount };  
+         }));
+   
+         res.send(categoryWithCount);  
+      } catch (error) {
+         res.status(500).send({ message: 'Error fetching data' });
+      }
+   });
 
     app.post('/category', async (req, res) => {
       const categoryBody = req.body
@@ -246,7 +260,7 @@ async function run() {
           const result = await medicineCollection
               .find()
               .sort({ _id: -1 }) // Newest products first (descending order)
-              .limit(6) // Limit to the latest 6 products
+              .limit(8) // Limit to the latest 6 products
               .toArray();
           res.send(result);
       } catch (error) {
