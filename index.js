@@ -128,6 +128,40 @@ async function run() {
       res.send(result)
     })
 
+
+        //  my profile user show//
+    app.get('/myprofile/:email', async (req, res) => {
+      const email = req.params.email
+      const query = { userEmail: email }
+      const result = await usersCollection.findOne(query)
+      res.send(result)
+    })
+
+
+    //  my profile user name phoro update//
+
+    app.put('/myprofile/:id', async (req, res) => {
+      const id = req.params.id;
+      const updateData = req.body;
+  
+      try {
+          const result = await usersCollection.updateOne(
+              { _id: new ObjectId(id) },
+              { $set: updateData }
+          );
+  
+          res.send(result);
+      } catch (error) {
+          res.status(500).send({ error: "Failed to update profile" });
+      }
+  });
+
+
+    // //////////////////////////
+
+
+
+
     // category//
 
     // app.get('/category', async (req, res) => {
@@ -137,17 +171,17 @@ async function run() {
 
     app.get('/category', async (req, res) => {
       try {
-         const categories = await categoryCollection.find().toArray();
-         const categoryWithCount = await Promise.all(categories.map(async (category) => {
-            const productCount = await medicineCollection.countDocuments({ medicineCategory: category.categoryName });
-            return { ...category, productCount };  
-         }));
-   
-         res.send(categoryWithCount);  
+        const categories = await categoryCollection.find().toArray();
+        const categoryWithCount = await Promise.all(categories.map(async (category) => {
+          const productCount = await medicineCollection.countDocuments({ medicineCategory: category.categoryName });
+          return { ...category, productCount };
+        }));
+
+        res.send(categoryWithCount);
       } catch (error) {
-         res.status(500).send({ message: 'Error fetching data' });
+        res.status(500).send({ message: 'Error fetching data' });
       }
-   });
+    });
 
     app.post('/category', async (req, res) => {
       const categoryBody = req.body
@@ -220,7 +254,7 @@ async function run() {
       res.send(result)
     })
 
-    app.delete("/advertisement/:id",  async (req, res) => {
+    app.delete("/advertisement/:id", async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) };
       const result = await advertisementCollection.deleteOne(query);
@@ -244,32 +278,32 @@ async function run() {
           {
             company: { $regex: search, $options: 'i' }
           },
-          
+
         ]
       };
-      
+
       let options = {}
       if (sort) options = { sort: { perUnitPrice: sort === "asc" ? 1 : -1 } }
-      const result = await medicineCollection.find(query,options).toArray()
+      const result = await medicineCollection.find(query, options).toArray()
       res.send(result)
     })
 
 
     app.get('/latest-product', async (req, res) => {
       try {
-          const result = await medicineCollection
-              .find()
-              .sort({ _id: -1 }) // Newest products first (descending order)
-              .limit(8) // Limit to the latest 6 products
-              .toArray();
-          res.send(result);
+        const result = await medicineCollection
+          .find()
+          .sort({ _id: -1 }) // Newest products first (descending order)
+          .limit(8) // Limit to the latest 6 products
+          .toArray();
+        res.send(result);
       } catch (error) {
-          console.error("Error fetching latest products:", error);
-          res.status(500).send({ error: "Failed to fetch latest products" });
+        console.error("Error fetching latest products:", error);
+        res.status(500).send({ error: "Failed to fetch latest products" });
       }
-  });
+    });
 
-//////////////////// Az
+    //////////////////// Az
 
 
     app.get('/medicine/manage/:email', async (req, res) => {
@@ -281,7 +315,7 @@ async function run() {
 
 
 
-// ////////
+    // ////////
 
 
     app.get('/medicine-percent', async (req, res) => {
