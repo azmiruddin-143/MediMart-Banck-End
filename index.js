@@ -130,32 +130,58 @@ async function run() {
     })
 
 
-        //  my profile user show//
-    app.get('/myprofile/:email', verifyToken, async (req, res) => {
-      const email = req.params.email
-      const query = { userEmail: email }
-      const result = await usersCollection.findOne(query)
-      res.send(result)
-    })
+      //   //  my profile user show//
+      // app.put('/myprofile/:email',  async (req, res) => {
+      //   const email = req.params.email
+      //   const filter = {userEmail: email}
+      //   const updateProfile = req.body
+      //   const updateDoc = {
+      //     $set: {
+      //       userName: updateProfile.userName,
+      //       userphoto: updateProfile.userphoto,
+        
+      //     }
+      //   }
+      //   const result = await usersCollection.updateOne(filter, updateDoc);
+      //   res.send(result)
+      // })
+
+      app.put('/myprofile/:email', async (req, res) => {
+        const email = req.params.email;
+        const filter = { userEmail: email };
+        const updateProfile = req.body;
+    
+        const updateDoc = {
+            $set: {
+                ...(updateProfile.userName && { userName: updateProfile.userName }),
+                ...(updateProfile.userphoto && { userphoto: updateProfile.userphoto }),
+            },
+        };
+    
+        const result = await usersCollection.updateOne(filter, updateDoc);
+        res.send(result);
+    });
+  
+      
 
 
     //  my profile user name photo update//
 
-    app.put('/myprofile/:id',verifyToken, async (req, res) => {
-      const id = req.params.id;
-      const updateData = req.body;
+  //   app.put('/myprofile/:id',verifyToken, async (req, res) => {
+  //     const id = req.params.id;
+  //     const updateData = req.body;
   
-      try {
-          const result = await usersCollection.updateOne(
-              { _id: new ObjectId(id) },
-              { $set: updateData }
-          );
+  //     try {
+  //         const result = await usersCollection.updateOne(
+  //             { _id: new ObjectId(id) },
+  //             { $set: updateData }
+  //         );
   
-          res.send(result);
-      } catch (error) {
-          res.status(500).send({ error: "Failed to update profile" });
-      }
-  });
+  //         res.send(result);
+  //     } catch (error) {
+  //         res.status(500).send({ error: "Failed to update profile" });
+  //     }
+  // });
 
 
   //  users delete/
@@ -235,7 +261,7 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/acceptad-advertisement', verifyToken, verifyAdmin, async (req, res) => {
+    app.get('/acceptad-advertisement',  async (req, res) => {
       try {
         const result = await advertisementCollection
           .find({ advertisementStatus: "Accept" })
