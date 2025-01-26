@@ -130,22 +130,8 @@ async function run() {
     })
 
 
-      //   //  my profile user show//
-      // app.put('/myprofile/:email',  async (req, res) => {
-      //   const email = req.params.email
-      //   const filter = {userEmail: email}
-      //   const updateProfile = req.body
-      //   const updateDoc = {
-      //     $set: {
-      //       userName: updateProfile.userName,
-      //       userphoto: updateProfile.userphoto,
-        
-      //     }
-      //   }
-      //   const result = await usersCollection.updateOne(filter, updateDoc);
-      //   res.send(result)
-      // })
-
+      //  my profile user show//
+    
       app.put('/myprofile/:email', async (req, res) => {
         const email = req.params.email;
         const filter = { userEmail: email };
