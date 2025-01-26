@@ -48,7 +48,7 @@ async function run() {
     // midde ware //
 
     const verifyToken = (req, res, next) => {
-      console.log(req.headers);
+      console.log("Headers received:", req.headers); // Check headers
 
       if (!req.headers.authorization) {
         return res.status(401).send({ message: "forbidden access" })
@@ -97,6 +97,8 @@ async function run() {
       const result = await usersCollection.insertOne(usersBody)
       res.send(result)
     })
+
+
     app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray()
       res.send(result)
@@ -104,10 +106,9 @@ async function run() {
 
     // admin user validation//
 
-
     ////////// hooks user role/////////
 
-    app.get('/users/role/:email', verifyToken, async (req, res) => {
+    app.get('/users/role/:email',  async (req, res) => {
       const userEmail = req.params.email
       const query = { userEmail }
       const result = await usersCollection.findOne(query)
@@ -130,7 +131,7 @@ async function run() {
 
 
         //  my profile user show//
-    app.get('/myprofile/:email', async (req, res) => {
+    app.get('/myprofile/:email', verifyToken, async (req, res) => {
       const email = req.params.email
       const query = { userEmail: email }
       const result = await usersCollection.findOne(query)
@@ -138,9 +139,9 @@ async function run() {
     })
 
 
-    //  my profile user name phoro update//
+    //  my profile user name photo update//
 
-    app.put('/myprofile/:id', async (req, res) => {
+    app.put('/myprofile/:id',verifyToken, async (req, res) => {
       const id = req.params.id;
       const updateData = req.body;
   
@@ -157,18 +158,20 @@ async function run() {
   });
 
 
+  //  users delete/
+  app.delete("/users/:id",verifyToken, verifyAdmin,  async (req, res) => {
+    const id = req.params.id
+    const query = { _id: new ObjectId(id) };
+    const result = await usersCollection.deleteOne(query);
+    res.send(result)
+  })
+
+
     // //////////////////////////
-
-
-
 
     // category//
 
-    // app.get('/category', async (req, res) => {
-    //   const result = await categoryCollection.find().toArray()
-    //   res.send(result)
-    // })
-
+   
     app.get('/category', async (req, res) => {
       try {
         const categories = await categoryCollection.find().toArray();
@@ -183,7 +186,7 @@ async function run() {
       }
     });
 
-    app.post('/category', async (req, res) => {
+    app.post('/category', verifyToken, verifyAdmin, async (req, res) => {
       const categoryBody = req.body
       const result = await categoryCollection.insertOne(categoryBody)
       res.send(result)
@@ -191,7 +194,7 @@ async function run() {
 
 
     //  category update
-    app.put('/category/:id', verifyToken, async (req, res) => {
+    app.put('/category/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id
       const filter = { _id: new ObjectId(id) }
       const updateCategory = req.body
@@ -207,23 +210,32 @@ async function run() {
 
 
     //  category delete/
-    app.delete("/category/:id", verifyToken, async (req, res) => {
+    app.delete("/category/:id", verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) };
       const result = await categoryCollection.deleteOne(query);
       res.send(result)
     })
 
+/////   token end admin///
+
 
     //  .............advertisement ////////////
 
 
-    app.get('/advertisement', async (req, res) => {
+    app.get('/advertisement', verifyToken, async (req, res) => {
       const result = await advertisementCollection.find().toArray()
       res.send(result)
     })
 
-    app.get('/acceptad-advertisement', async (req, res) => {
+    app.get('/seller-advertisement/:email',verifyToken, async (req, res) => {
+      const email = req.params.email
+      const query = {requestEmail: email }
+      const result = await advertisementCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    app.get('/acceptad-advertisement', verifyToken, verifyAdmin, async (req, res) => {
       try {
         const result = await advertisementCollection
           .find({ advertisementStatus: "Accept" })
@@ -254,7 +266,7 @@ async function run() {
       res.send(result)
     })
 
-    app.delete("/advertisement/:id", async (req, res) => {
+    app.delete("/advertisement/:id",verifyToken, async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) };
       const result = await advertisementCollection.deleteOne(query);
@@ -377,7 +389,7 @@ async function run() {
 
     // carts collections///
 
-    app.post('/carts', async (req, res) => {
+    app.post('/carts',  async (req, res) => {
       const cartsBody = req.body
       const result = await cartsCollection.insertOne(cartsBody)
       res.send(result)
@@ -434,7 +446,7 @@ async function run() {
     // Admin home page//
 
 
-    app.get("/payment/pending-paid", async (req, res) => {
+    app.get("/payment/pending-paid", verifyToken,  async (req, res) => {
       const pendingQuery = { status: "Pending" }
       const paidQuery = { status: "Paid" }
       const pendingCount = await paymentCollection.countDocuments(pendingQuery)
@@ -460,7 +472,7 @@ async function run() {
     });
 
 
-    app.get('/all-payments', async (req, res) => {
+    app.get('/all-payments', verifyToken,  async (req, res) => {
       const result = await paymentCollection.find().toArray()
       res.send(result)
     })
@@ -483,7 +495,7 @@ async function run() {
     // Seller home page//
 
 
-    app.get("/payment/pending-paid/:email", async (req, res) => {
+    app.get("/payment/pending-paid/:email", verifyToken, async (req, res) => {
       const email = req.params.email
       const pendingQuery = { status: "Pending", sellerEmail: email }
       const paidQuery = { status: "Paid", sellerEmail: email }
@@ -503,14 +515,14 @@ async function run() {
       res.send({ pendingPrice, paidPrice });
     });
 
-    app.get("/order/total/:email", async (req, res) => {
+    app.get("/order/total/:email", verifyToken, async (req, res) => {
       const email = req.params.email
       const query = { sellerEmail: email }
       const totalOrder = await paymentCollection.countDocuments(query)
       res.send({ totalOrder });
     });
 
-    app.get('/all-payments/:email', async (req, res) => {
+    app.get('/all-payments/:email', verifyToken, async (req, res) => {
       const email = req.params.email
       const query = { sellerEmail: email }
       const result = await paymentCollection.find(query).toArray()
@@ -519,7 +531,7 @@ async function run() {
 
     // User Payment history//
 
-    app.get('/user/all-payments/:email', async (req, res) => {
+    app.get('/user/all-payments/:email', verifyToken ,async (req, res) => {
       const email = req.params.email
       const query = { email: email }
       const result = await paymentCollection.find(query).toArray()
@@ -528,7 +540,7 @@ async function run() {
 
     //  invoice//
 
-    app.get('/invoice/payment/:transactionId', async (req, res) => {
+    app.get('/invoice/payment/:transactionId', verifyToken, async (req, res) => {
       const { transactionId } = req.params;
       const payment = await paymentCollection.findOne({ transactionId })
       res.send(payment)
@@ -539,7 +551,7 @@ async function run() {
     // /////////////////////////////////////////////////////
 
     // payment intent
-    app.post('/create-payment-intent', async (req, res) => {
+    app.post('/create-payment-intent', verifyToken, async (req, res) => {
       const { subTotal } = req.body;
       const amount = parseInt(subTotal * 100);
       console.log(amount, 'amount inside the intent')
