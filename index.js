@@ -153,22 +153,7 @@ async function run() {
 
     //  my profile user name photo update//
 
-  //   app.put('/myprofile/:id',verifyToken, async (req, res) => {
-  //     const id = req.params.id;
-  //     const updateData = req.body;
   
-  //     try {
-  //         const result = await usersCollection.updateOne(
-  //             { _id: new ObjectId(id) },
-  //             { $set: updateData }
-  //         );
-  
-  //         res.send(result);
-  //     } catch (error) {
-  //         res.status(500).send({ error: "Failed to update profile" });
-  //     }
-  // });
-
 
   //  users delete/
   app.delete("/users/:id",verifyToken, verifyAdmin,  async (req, res) => {
