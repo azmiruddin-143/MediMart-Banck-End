@@ -36,6 +36,7 @@ async function run() {
     const medicineCollection = database.collection("medicine");
     const cartsCollection = database.collection("carts");
     const paymentCollection = database.collection("payments");
+    const articlesCollection = database.collection("articles");
 
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -108,7 +109,7 @@ async function run() {
 
     ////////// hooks user role/////////
 
-    app.get('/users/role/:email',  async (req, res) => {
+    app.get('/users/role/:email', async (req, res) => {
       const userEmail = req.params.email
       const query = { userEmail }
       const result = await usersCollection.findOne(query)
@@ -130,45 +131,45 @@ async function run() {
     })
 
 
-      //  my profile user show//
-    
-      app.put('/myprofile/:email', async (req, res) => {
-        const email = req.params.email;
-        const filter = { userEmail: email };
-        const updateProfile = req.body;
-    
-        const updateDoc = {
-            $set: {
-                ...(updateProfile.userName && { userName: updateProfile.userName }),
-                ...(updateProfile.userphoto && { userphoto: updateProfile.userphoto }),
-            },
-        };
-    
-        const result = await usersCollection.updateOne(filter, updateDoc);
-        res.send(result);
+    //  my profile user show//
+
+    app.put('/myprofile/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = { userEmail: email };
+      const updateProfile = req.body;
+
+      const updateDoc = {
+        $set: {
+          ...(updateProfile.userName && { userName: updateProfile.userName }),
+          ...(updateProfile.userphoto && { userphoto: updateProfile.userphoto }),
+        },
+      };
+
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
     });
-  
-      
+
+
 
 
     //  my profile user name photo update//
 
-  
 
-  //  users delete/
-  app.delete("/users/:id",verifyToken, verifyAdmin,  async (req, res) => {
-    const id = req.params.id
-    const query = { _id: new ObjectId(id) };
-    const result = await usersCollection.deleteOne(query);
-    res.send(result)
-  })
+
+    //  users delete/
+    app.delete("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result)
+    })
 
 
     // //////////////////////////
 
     // category//
 
-   
+
     app.get('/category', async (req, res) => {
       try {
         const categories = await categoryCollection.find().toArray();
@@ -214,7 +215,7 @@ async function run() {
       res.send(result)
     })
 
-/////   token end admin///
+    /////   token end admin///
 
 
     //  .............advertisement ////////////
@@ -225,14 +226,14 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/seller-advertisement/:email',verifyToken, async (req, res) => {
+    app.get('/seller-advertisement/:email', verifyToken, async (req, res) => {
       const email = req.params.email
-      const query = {requestEmail: email }
+      const query = { requestEmail: email }
       const result = await advertisementCollection.find(query).toArray()
       res.send(result)
     })
 
-    app.get('/acceptad-advertisement',  async (req, res) => {
+    app.get('/acceptad-advertisement', async (req, res) => {
       try {
         const result = await advertisementCollection
           .find({ advertisementStatus: "Accept" })
@@ -263,7 +264,7 @@ async function run() {
       res.send(result)
     })
 
-    app.delete("/advertisement/:id",verifyToken, async (req, res) => {
+    app.delete("/advertisement/:id", verifyToken, async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) };
       const result = await advertisementCollection.deleteOne(query);
@@ -386,7 +387,7 @@ async function run() {
 
     // carts collections///
 
-    app.post('/carts',  async (req, res) => {
+    app.post('/carts', async (req, res) => {
       const cartsBody = req.body
       const result = await cartsCollection.insertOne(cartsBody)
       res.send(result)
@@ -443,7 +444,7 @@ async function run() {
     // Admin home page//
 
 
-    app.get("/payment/pending-paid", verifyToken,  async (req, res) => {
+    app.get("/payment/pending-paid", verifyToken, async (req, res) => {
       const pendingQuery = { status: "Pending" }
       const paidQuery = { status: "Paid" }
       const pendingCount = await paymentCollection.countDocuments(pendingQuery)
@@ -469,7 +470,7 @@ async function run() {
     });
 
 
-    app.get('/all-payments', verifyToken,  async (req, res) => {
+    app.get('/all-payments', verifyToken, async (req, res) => {
       const result = await paymentCollection.find().toArray()
       res.send(result)
     })
@@ -528,7 +529,7 @@ async function run() {
 
     // User Payment history//
 
-    app.get('/user/all-payments/:email', verifyToken ,async (req, res) => {
+    app.get('/user/all-payments/:email', verifyToken, async (req, res) => {
       const email = req.params.email
       const query = { email: email }
       const result = await paymentCollection.find(query).toArray()
@@ -543,6 +544,16 @@ async function run() {
       res.send(payment)
     });
 
+
+
+    // articles start//
+
+    app.get('/articles', async (req, res) => {
+      const result = await articlesCollection.find().toArray();
+      res.send(result)
+    });
+
+    // articles end//
 
 
     // /////////////////////////////////////////////////////
